@@ -37,6 +37,19 @@ export function useSendMessage(notebookId: string) {
 
   const sendMessage = useCallback(
     async (content: string) => {
+      // 낙관적 업데이트: 사용자 메시지 즉시 표시
+      const optimisticMessage: ChatMessage = {
+        id: `temp-${Date.now()}`,
+        notebook_id: notebookId,
+        role: "user",
+        content,
+        created_at: new Date().toISOString(),
+      };
+      queryClient.setQueryData<ChatMessage[]>(
+        ["chat-messages", notebookId],
+        (old) => [...(old || []), optimisticMessage]
+      );
+
       setIsStreaming(true);
       setStreamingContent("");
 
