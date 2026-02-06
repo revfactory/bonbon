@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
-  X, Download, RefreshCw, ChevronLeft, ChevronRight,
+  Download, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import type { StudioOutput } from "@/lib/supabase/types";
 

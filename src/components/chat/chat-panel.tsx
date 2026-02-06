@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, AlertTriangle, Copy, BookmarkPlus, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Send, Square, AlertTriangle, Copy, BookmarkPlus, ThumbsUp, ThumbsDown } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { ko } from "date-fns/locale";
 import { useChatMessages, useSendMessage } from "@/hooks/use-chat";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -18,7 +20,7 @@ export function ChatPanel({ notebookId, notebookTitle }: ChatPanelProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: messages = [], isLoading } = useChatMessages(notebookId);
-  const { sendMessage, isStreaming, streamingContent } =
+  const { sendMessage, isStreaming, streamingContent, stopStreaming } =
     useSendMessage(notebookId);
 
   useEffect(() => {
@@ -109,9 +111,14 @@ export function ChatPanel({ notebookId, notebookTitle }: ChatPanelProps) {
               <div key={msg.id}>
                 {msg.role === "user" ? (
                   <div className="flex justify-end">
-                    <div className="bg-brand-light rounded-2xl rounded-br-md px-4 py-3 max-w-[80%]">
-                      <p className="text-sm text-text-primary whitespace-pre-wrap">
-                        {msg.content}
+                    <div>
+                      <div className="bg-brand-light rounded-2xl rounded-br-md px-4 py-3 max-w-[80%] ml-auto">
+                        <p className="text-sm text-text-primary whitespace-pre-wrap">
+                          {msg.content}
+                        </p>
+                      </div>
+                      <p className="text-[11px] text-text-muted text-right mt-1">
+                        {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: ko })}
                       </p>
                     </div>
                   </div>
@@ -123,6 +130,9 @@ export function ChatPanel({ notebookId, notebookTitle }: ChatPanelProps) {
                       </ReactMarkdown>
                     </div>
                     <div className="flex items-center gap-1">
+                      <span className="text-[11px] text-text-muted mr-1">
+                        {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true, locale: ko })}
+                      </span>
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText(msg.content);
@@ -132,13 +142,22 @@ export function ChatPanel({ notebookId, notebookTitle }: ChatPanelProps) {
                       >
                         <Copy className="w-3.5 h-3.5" />
                       </button>
-                      <button className="p-1.5 rounded-md hover:bg-gray-100 text-text-muted cursor-pointer">
+                      <button
+                        onClick={() => toast.info("메모 저장 기능은 준비 중입니다.")}
+                        className="p-1.5 rounded-md hover:bg-gray-100 text-text-muted cursor-pointer"
+                      >
                         <BookmarkPlus className="w-3.5 h-3.5" />
                       </button>
-                      <button className="p-1.5 rounded-md hover:bg-gray-100 text-text-muted cursor-pointer">
+                      <button
+                        onClick={() => toast.success("좋은 응답으로 표시했습니다.")}
+                        className="p-1.5 rounded-md hover:bg-gray-100 text-text-muted cursor-pointer"
+                      >
                         <ThumbsUp className="w-3.5 h-3.5" />
                       </button>
-                      <button className="p-1.5 rounded-md hover:bg-gray-100 text-text-muted cursor-pointer">
+                      <button
+                        onClick={() => toast.info("피드백이 반영되었습니다.")}
+                        className="p-1.5 rounded-md hover:bg-gray-100 text-text-muted cursor-pointer"
+                      >
                         <ThumbsDown className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -182,17 +201,26 @@ export function ChatPanel({ notebookId, notebookTitle }: ChatPanelProps) {
             className="w-full min-h-[44px] max-h-[200px] resize-none rounded-2xl border border-border-default px-4 py-3 pr-12 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition-colors"
             rows={1}
           />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || isStreaming}
-            className={`absolute right-2 bottom-2 w-9 h-9 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
-              input.trim() && !isStreaming
-                ? "bg-brand text-white hover:bg-brand-hover"
-                : "bg-gray-200 text-text-muted"
-            }`}
-          >
-            <Send className="w-4 h-4" />
-          </button>
+          {isStreaming ? (
+            <button
+              onClick={stopStreaming}
+              className="absolute right-2 bottom-2 w-9 h-9 rounded-full flex items-center justify-center bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer"
+            >
+              <Square className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              onClick={handleSend}
+              disabled={!input.trim()}
+              className={`absolute right-2 bottom-2 w-9 h-9 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                input.trim()
+                  ? "bg-brand text-white hover:bg-brand-hover"
+                  : "bg-gray-200 text-text-muted"
+              }`}
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
     </div>

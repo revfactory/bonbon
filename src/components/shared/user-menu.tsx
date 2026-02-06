@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings } from "lucide-react";
+import { LogOut, Settings, Loader2 } from "lucide-react";
 
 interface UserMenuProps {
   user: {
@@ -22,11 +23,17 @@ interface UserMenuProps {
 
 export function UserMenu({ user }: UserMenuProps) {
   const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
+    setIsSigningOut(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/login");
+    } catch {
+      setIsSigningOut(false);
+    }
   };
 
   const initials = (user.display_name || user.email)
@@ -61,9 +68,13 @@ export function UserMenu({ user }: UserMenuProps) {
           설정
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
-          <LogOut className="w-4 h-4 mr-2" />
-          로그아웃
+        <DropdownMenuItem onClick={handleSignOut} disabled={isSigningOut} className="cursor-pointer">
+          {isSigningOut ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <LogOut className="w-4 h-4 mr-2" />
+          )}
+          {isSigningOut ? "로그아웃 중..." : "로그아웃"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

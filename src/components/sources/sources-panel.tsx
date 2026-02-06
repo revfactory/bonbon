@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, FileText, Link2, Youtube, Type, Image, Music, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Plus, Search, FileText, Link2, Youtube, Type, Image, Music, Loader2, AlertCircle, CheckCircle2, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSources, useToggleSource, useToggleAllSources, useDeleteSource } from "@/hooks/use-sources";
@@ -42,10 +42,14 @@ interface SourcesPanelProps {
 export function SourcesPanel({ notebookId }: SourcesPanelProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedSource, setSelectedSource] = useState<Source | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: sources = [], isLoading } = useSources(notebookId);
   const toggleSource = useToggleSource();
   const toggleAll = useToggleAllSources();
 
+  const filteredSources = searchQuery
+    ? sources.filter((s) => s.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    : sources;
   const allEnabled = sources.length > 0 && sources.every((s) => s.is_enabled);
   const enabledCount = sources.filter((s) => s.is_enabled).length;
 
@@ -63,6 +67,26 @@ export function SourcesPanel({ notebookId }: SourcesPanelProps) {
           <Plus className="w-4 h-4" />
           소스 추가
         </button>
+        {sources.length > 0 && (
+          <div className="relative mt-2">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="소스 검색..."
+              className="w-full h-8 pl-8 pr-8 text-[13px] rounded-md border border-border-default focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-gray-100 cursor-pointer"
+              >
+                <X className="w-3 h-3 text-text-muted" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Source List */}
@@ -98,7 +122,7 @@ export function SourcesPanel({ notebookId }: SourcesPanelProps) {
             </label>
 
             {/* Sources */}
-            {sources.map((source) => (
+            {filteredSources.map((source) => (
               <div
                 key={source.id}
                 className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-50 group cursor-pointer"

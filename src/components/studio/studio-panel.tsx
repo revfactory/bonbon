@@ -13,6 +13,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useStudioOutputs, useDeleteStudioOutput } from "@/hooks/use-studio";
 import { InfographicModal } from "./infographic-modal";
 import { SlideModal } from "./slide-modal";
@@ -50,6 +60,7 @@ export function StudioPanel({ notebookId }: StudioPanelProps) {
   const [showInfographicModal, setShowInfographicModal] = useState(false);
   const [showSlideModal, setShowSlideModal] = useState(false);
   const [viewingOutput, setViewingOutput] = useState<StudioOutput | null>(null);
+  const [deletingOutputId, setDeletingOutputId] = useState<string | null>(null);
 
   const { data: outputs = [] } = useStudioOutputs(notebookId);
   const deleteOutput = useDeleteStudioOutput();
@@ -64,7 +75,6 @@ export function StudioPanel({ notebookId }: StudioPanelProps) {
   };
 
   const handleDeleteOutput = async (id: string) => {
-    if (!confirm("이 콘텐츠를 삭제하시겠습니까?")) return;
     try {
       await deleteOutput.mutateAsync(id);
       toast.success("삭제되었습니다.");
@@ -152,7 +162,7 @@ export function StudioPanel({ notebookId }: StudioPanelProps) {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleDeleteOutput(output.id);
+                              setDeletingOutputId(output.id);
                             }}
                             className="text-error cursor-pointer"
                           >
@@ -172,7 +182,10 @@ export function StudioPanel({ notebookId }: StudioPanelProps) {
 
       {/* Bottom Action */}
       <div className="p-3 border-t border-border-default">
-        <button className="w-full h-10 flex items-center justify-center gap-2 bg-gray-50 border border-border-default rounded-lg text-[13px] text-text-secondary hover:bg-gray-100 transition-colors cursor-pointer">
+        <button
+          onClick={() => toast.info("메모 기능은 준비 중입니다.")}
+          className="w-full h-10 flex items-center justify-center gap-2 bg-gray-50 border border-border-default rounded-lg text-[13px] text-text-secondary hover:bg-gray-100 transition-colors cursor-pointer"
+        >
           <StickyNote className="w-4 h-4" />
           메모 추가
         </button>
@@ -197,6 +210,30 @@ export function StudioPanel({ notebookId }: StudioPanelProps) {
           onClose={() => setViewingOutput(null)}
         />
       )}
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deletingOutputId} onOpenChange={(open) => !open && setDeletingOutputId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>콘텐츠 삭제</AlertDialogTitle>
+            <AlertDialogDescription>
+              이 콘텐츠를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deletingOutputId) handleDeleteOutput(deletingOutputId);
+                setDeletingOutputId(null);
+              }}
+              className="bg-error hover:bg-red-700"
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

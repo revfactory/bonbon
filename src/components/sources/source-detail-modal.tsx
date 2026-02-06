@@ -1,11 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Copy, Trash2, FileText, Link2, Type, Youtube, Image, Music } from "lucide-react";
@@ -45,6 +56,7 @@ interface SourceDetailModalProps {
 }
 
 export function SourceDetailModal({ source, onClose }: SourceDetailModalProps) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const deleteSource = useDeleteSource();
 
   if (!source) return null;
@@ -56,7 +68,6 @@ export function SourceDetailModal({ source, onClose }: SourceDetailModalProps) {
   };
 
   const handleDelete = async () => {
-    if (!confirm("이 소스를 삭제하시겠습니까?")) return;
     try {
       await deleteSource.mutateAsync(source.id);
       toast.success("소스가 삭제되었습니다.");
@@ -67,6 +78,7 @@ export function SourceDetailModal({ source, onClose }: SourceDetailModalProps) {
   };
 
   return (
+    <>
     <Dialog open={!!source} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[640px] max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
@@ -129,7 +141,7 @@ export function SourceDetailModal({ source, onClose }: SourceDetailModalProps) {
             variant="ghost"
             size="sm"
             className="text-error hover:text-error hover:bg-red-50"
-            onClick={handleDelete}
+            onClick={() => setShowDeleteDialog(true)}
           >
             <Trash2 className="w-4 h-4 mr-1.5" />
             삭제
@@ -146,5 +158,27 @@ export function SourceDetailModal({ source, onClose }: SourceDetailModalProps) {
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Delete Confirmation */}
+    <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>소스 삭제</AlertDialogTitle>
+          <AlertDialogDescription>
+            &ldquo;{source.title}&rdquo; 소스를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>취소</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            className="bg-error hover:bg-red-700"
+          >
+            삭제
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

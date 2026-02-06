@@ -5,6 +5,7 @@ import { UserMenu } from "./user-menu";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
+import { toast } from "sonner";
 
 interface NotebookNavProps {
   user: {
@@ -109,7 +110,10 @@ export function NotebookNav({
           <Share2 className="w-4 h-4" />
         </button>
 
-        <button className="p-1.5 rounded-md hover:bg-gray-50 text-text-tertiary cursor-pointer">
+        <button
+          onClick={() => toast.info("설정 기능은 준비 중입니다.")}
+          className="p-1.5 rounded-md hover:bg-gray-50 text-text-tertiary cursor-pointer"
+        >
           <Settings className="w-4 h-4" />
         </button>
 

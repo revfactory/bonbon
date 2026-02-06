@@ -4,6 +4,7 @@ import { BookOpen, Grid3X3, List, Search } from "lucide-react";
 import { UserMenu } from "./user-menu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface HomeNavProps {
   user: {
@@ -64,7 +65,10 @@ export function HomeNav({
 
       {/* Actions */}
       <div className="flex items-center gap-2">
-        <button className="p-2 rounded-md hover:bg-gray-50 text-text-tertiary cursor-pointer">
+        <button
+          onClick={() => toast.info("검색 기능은 준비 중입니다.")}
+          className="p-2 rounded-md hover:bg-gray-50 text-text-tertiary cursor-pointer"
+        >
           <Search className="w-5 h-5" />
         </button>
 

@@ -13,7 +13,7 @@ export async function generateChatResponse(
   }));
 
   const chat = ai.chats.create({
-    model: "gemini-2.5-flash",
+    model: "gemini-3-flash-preview",
     config: {
       systemInstruction: systemPrompt,
     },
@@ -42,7 +42,7 @@ export async function generateChatResponse(
 
 export async function generateText(prompt: string): Promise<string> {
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-3-flash-preview",
     contents: [{ role: "user", parts: [{ text: prompt }] }],
   });
 

@@ -1,17 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleGoogleLogin = async () => {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    setIsLoading(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+    } catch {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -29,7 +37,8 @@ export default function LoginPage() {
 
         <button
           onClick={handleGoogleLogin}
-          className="w-full h-12 flex items-center justify-center gap-3 border border-border-default rounded-lg text-sm font-medium text-text-primary hover:bg-gray-50 hover:border-border-hover active:bg-gray-100 transition-colors cursor-pointer"
+          disabled={isLoading}
+          className="w-full h-12 flex items-center justify-center gap-3 border border-border-default rounded-lg text-sm font-medium text-text-primary hover:bg-gray-50 hover:border-border-hover active:bg-gray-100 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -49,7 +58,14 @@ export default function LoginPage() {
               fill="#EA4335"
             />
           </svg>
-          Google로 계속하기
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              로그인 중...
+            </span>
+          ) : (
+            "Google로 계속하기"
+          )}
         </button>
 
         <p className="text-xs text-text-muted text-center mt-6">

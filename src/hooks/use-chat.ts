@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { ChatMessage } from "@/lib/supabase/types";
 
 export function useChatMessages(notebookId: string) {
@@ -27,18 +27,28 @@ export function useChatMessages(notebookId: string) {
 export function useSendMessage(notebookId: string) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
+  const abortControllerRef = useRef<AbortController | null>(null);
   const queryClient = useQueryClient();
+
+  const stopStreaming = useCallback(() => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+  }, []);
 
   const sendMessage = useCallback(
     async (content: string) => {
       setIsStreaming(true);
       setStreamingContent("");
 
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       try {
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ notebookId, message: content }),
+          signal: controller.signal,
         });
 
         if (!response.ok) throw new Error("Chat request failed");
@@ -62,13 +72,23 @@ export function useSendMessage(notebookId: string) {
         queryClient.invalidateQueries({
           queryKey: ["chat-messages", notebookId],
         });
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") {
+          // Aborted by user — still refresh messages
+          queryClient.invalidateQueries({
+            queryKey: ["chat-messages", notebookId],
+          });
+        } else {
+          throw err;
+        }
       } finally {
         setIsStreaming(false);
         setStreamingContent("");
+        abortControllerRef.current = null;
       }
     },
     [notebookId, queryClient]
   );
 
-  return { sendMessage, isStreaming, streamingContent };
+  return { sendMessage, isStreaming, streamingContent, stopStreaming };
 }

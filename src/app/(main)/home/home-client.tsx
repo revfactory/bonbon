@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { BookOpen } from "lucide-react";
+import Link from "next/link";
 import { HomeNav } from "@/components/shared/home-nav";
 import { NotebookCard } from "@/components/notebook/notebook-card";
 import { NewNotebookCard } from "@/components/notebook/new-notebook-card";
@@ -59,6 +60,7 @@ export function HomeClient({ user }: HomeClientProps) {
   };
 
   const filteredNotebooks = notebooks?.filter((nb) => {
+    if (activeTab === "mine") return !nb.is_shared;
     if (activeTab === "shared") return nb.is_shared;
     return true;
   });
@@ -89,7 +91,7 @@ export function HomeClient({ user }: HomeClientProps) {
             ))}
           </div>
         ) : !filteredNotebooks?.length ? (
-          <div className="flex flex-col items-center justify-center mt-30">
+          <div className="flex flex-col items-center justify-center mt-32">
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               <BookOpen className="w-12 h-12 text-text-muted" />
             </div>
@@ -126,7 +128,7 @@ export function HomeClient({ user }: HomeClientProps) {
                   onRename={handleRename}
                 />
               ) : (
-                <a
+                <Link
                   key={notebook.id}
                   href={`/notebook/${notebook.id}`}
                   className="flex items-center gap-3 h-12 px-4 rounded-lg hover:bg-gray-50 transition-colors"
@@ -138,7 +140,7 @@ export function HomeClient({ user }: HomeClientProps) {
                   <span className="text-xs text-text-muted">
                     소스 {notebook.source_count}개
                   </span>
-                </a>
+                </Link>
               )
             )}
           </div>
