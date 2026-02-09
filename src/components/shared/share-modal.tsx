@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,16 +21,25 @@ interface ShareModalProps {
 
 export function ShareModal({ open, onClose, notebook }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
+  const [isShared, setIsShared] = useState(notebook.is_shared);
+  const [shareToken, setShareToken] = useState(notebook.share_token);
   const shareNotebook = useShareNotebook();
   const unshareNotebook = useUnshareNotebook();
 
-  const shareUrl = notebook.share_token
-    ? `${typeof window !== "undefined" ? window.location.origin : ""}/shared/${notebook.share_token}`
+  useEffect(() => {
+    setIsShared(notebook.is_shared);
+    setShareToken(notebook.share_token);
+  }, [notebook.is_shared, notebook.share_token]);
+
+  const shareUrl = shareToken
+    ? `${window.location.origin}/shared/${shareToken}`
     : null;
 
   const handleShare = async () => {
     try {
-      await shareNotebook.mutateAsync(notebook.id);
+      const result = await shareNotebook.mutateAsync(notebook.id);
+      setIsShared(true);
+      setShareToken(result.share_token);
       toast.success("공유 링크가 생성되었습니다.");
     } catch {
       toast.error("공유 설정에 실패했습니다.");
@@ -40,6 +49,8 @@ export function ShareModal({ open, onClose, notebook }: ShareModalProps) {
   const handleUnshare = async () => {
     try {
       await unshareNotebook.mutateAsync(notebook.id);
+      setIsShared(false);
+      setShareToken(null);
       toast.success("공유가 해제되었습니다.");
     } catch {
       toast.error("공유 해제에 실패했습니다.");
@@ -65,7 +76,7 @@ export function ShareModal({ open, onClose, notebook }: ShareModalProps) {
         </DialogHeader>
 
         <div className="space-y-4">
-          {notebook.is_shared && shareUrl ? (
+          {isShared && shareUrl ? (
             <>
               <p className="text-sm text-text-secondary">
                 이 노트북은 공유 중입니다. 링크를 가진 사람은 소스와 생성된 콘텐츠를 볼 수 있습니다.

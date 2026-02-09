@@ -54,7 +54,9 @@ export function ChatPanel({ notebookId, notebookTitle }: ChatPanelProps) {
     setInput(e.target.value);
     const el = e.target;
     el.style.height = "44px";
-    el.style.height = Math.min(el.scrollHeight, 200) + "px";
+    const newHeight = Math.min(el.scrollHeight, 200);
+    el.style.height = newHeight + "px";
+    el.style.overflowY = el.scrollHeight > 200 ? "auto" : "hidden";
   };
 
   const suggestedQuestions = [
@@ -113,8 +115,8 @@ export function ChatPanel({ notebookId, notebookTitle }: ChatPanelProps) {
               <div key={msg.id}>
                 {msg.role === "user" ? (
                   <div className="flex justify-end">
-                    <div>
-                      <div className="bg-brand-light rounded-2xl rounded-br-md px-4 py-3 max-w-[80%] ml-auto">
+                    <div className="max-w-[80%]">
+                      <div className="bg-brand-light rounded-2xl rounded-br-md px-4 py-3">
                         <p className="text-sm text-text-primary whitespace-pre-wrap">
                           {msg.content}
                         </p>
@@ -207,24 +209,24 @@ export function ChatPanel({ notebookId, notebookTitle }: ChatPanelProps) {
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="입력을 시작하세요..."
-            className="w-full min-h-[44px] max-h-[200px] resize-none rounded-2xl border border-border-default px-4 py-3 pr-12 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition-colors"
+            className="w-full min-h-[44px] max-h-[200px] resize-none overflow-hidden rounded-2xl border border-border-default px-4 py-3 pr-12 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition-colors"
             rows={1}
           />
           {isStreaming ? (
             <button
               onClick={stopStreaming}
-              className="absolute right-2 bottom-2 w-9 h-9 rounded-full flex items-center justify-center bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer"
             >
-              <Square className="w-4 h-4" />
+              <Square className="w-3.5 h-3.5" />
             </button>
           ) : (
             <button
               onClick={handleSend}
               disabled={!input.trim()}
-              className={`absolute right-2 bottom-2 w-9 h-9 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+              className={`absolute right-3.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
                 input.trim()
                   ? "bg-brand text-white hover:bg-brand-hover"
-                  : "bg-gray-200 text-text-muted"
+                  : "bg-gray-100 text-text-muted"
               }`}
             >
               <Send className="w-4 h-4" />

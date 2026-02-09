@@ -12,7 +12,7 @@ import { SourcesPanel } from "@/components/sources/sources-panel";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import { StudioPanel } from "@/components/studio/studio-panel";
 import { ShareModal } from "@/components/shared/share-modal";
-import { useUpdateNotebook, useNotebooks } from "@/hooks/use-notebooks";
+import { useUpdateNotebook } from "@/hooks/use-notebooks";
 import { cn } from "@/lib/utils";
 import type { Notebook } from "@/lib/supabase/types";
 import { toast } from "sonner";
@@ -39,8 +39,6 @@ export function NotebookClient({ notebook, user }: NotebookClientProps) {
   const [mobileTab, setMobileTab] = useState<MobileTab>("chat");
   const [showShareModal, setShowShareModal] = useState(false);
   const updateNotebook = useUpdateNotebook();
-  const { data: notebooks } = useNotebooks();
-  const currentNotebook = notebooks?.find((nb) => nb.id === notebook.id) || notebook;
 
   const handleTitleChange = async (newTitle: string) => {
     setTitle(newTitle);
@@ -128,7 +126,7 @@ export function NotebookClient({ notebook, user }: NotebookClientProps) {
       <ShareModal
         open={showShareModal}
         onClose={() => setShowShareModal(false)}
-        notebook={currentNotebook}
+        notebook={notebook}
       />
     </div>
   );
